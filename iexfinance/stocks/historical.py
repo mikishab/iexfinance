@@ -61,14 +61,18 @@ class HistoricalReader(Stock):
             return pd.DataFrame(out)
         for symbol in self.symbols:
             if symbol not in out:
-                raise IEXSymbolError(symbol)
+                # raise IEXSymbolError(symbol) - why stop everything and crash? lets log and continue
+                continue
             d = out.pop(symbol)["chart"]
+            if len(d) == 0:
+                continue  # when we don't get any values
             df = pd.DataFrame(d)
             if self.output_format == 'pandas':
                 df["date"] = pd.DatetimeIndex(df["date"])
             df = df.set_index(df["date"])
             values = ["close", "volume"]
-            if self.close_only is False:
+            # if self.close_only is False: - why not return those if they are available?
+            if {"open", "high", "low"}.issubset(df.columns):
                 values = ["open", "high", "low"] + values
             df = df[values]
             if self.single_day is False:
