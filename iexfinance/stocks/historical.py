@@ -62,8 +62,12 @@ class HistoricalReader(Stock):
         for symbol in self.symbols:
             if symbol not in out:
                 # raise IEXSymbolError(symbol) - why stop everything and crash? lets log and continue
+                print('could not find symbol', symbol, 'in the result from iex - continue')
                 continue
             d = out.pop(symbol)["chart"]
+            if d is None:
+                print('could not find a chart in', symbol, 'results from iex - continue')
+                continue
             if len(d) == 0:
                 continue  # when we don't get any values
             df = pd.DataFrame(d)
